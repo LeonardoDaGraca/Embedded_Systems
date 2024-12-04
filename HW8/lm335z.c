@@ -1,13 +1,20 @@
+/*
+ * Leonardo DaGraca
+ * HW8 : Thermistor Data Collection
+ *
+ * This program uses a thermistor to display the temperature of
+ * the room in Celsius. It allows the user to set a lower and upper
+ * desired temperatures using the respective potentiometer for the
+ * action. Based on the desired range assigned by the user, the correct
+ * LED will illuminate based on whether it is below the range(Blue),
+ * above the range(Red), and within the range(Green).
+ *
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <pigpio.h>
 #include <signal.h>
-
-/*
-gcc -pthread -o lm35 lm35.c -lpigpio -lrt
-lm35 [num_of_loops] [speed_of_transmission]
-defaults to 1000000 in both cases
-*/
 
 #define POT1_CHANNEL 1 //lower threshold
 #define POT2_CHANNEL 2 //upper threshold
@@ -29,11 +36,17 @@ int read_adc(int spi_handle, int channel) {
 	return ((buf[1] & 3) << 8) | buf[2];
 }
 
+/*
+ * helper function to read the threshold reading and map it to a Celsius value
+ */
 int read_threshold(int channel) {
 	int value = read_adc(0, channel);
 	return (int)(value * (100.0 / 1023.0)); //maps thresh reading from 0 - 100
 }
 
+/*
+ * Illuminate the correct LED based on the current temp and the lower and upper bounds
+ */
 void update_leds(float temp, int lower, int upper) {
 	if (temp < lower) {
 		gpioWrite(BLUE_LED, PI_HIGH);
